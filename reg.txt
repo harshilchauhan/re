@@ -1,0 +1,546 @@
+client:-
+component:-
+Adduser.js:-
+
+import React, { useState } from "react";
+import axios from "axios";
+
+const Adduser = () => {
+  const [uname, setuname] = useState("");
+  const [email, setemail] = useState("");
+  const [password, setpassword] = useState("");
+  const [gender, setgender] = useState("");
+  const [checked, setchecked] = useState("");
+  const checklist = ["coding", "playing", "reading"];
+  const [city, setcity] = useState("");
+
+  const adduserhandle = async () => {
+    await axios
+      .post("http://127.0.0.1:5050/reg/adduser", {
+        uname: uname,
+        email: email,
+        password: password,
+        gender: gender,
+        hobby: checkitems,
+        city: city,
+      })
+      .then((res) => {
+        alert("data inserted..");
+        console.log(res);
+      })
+      .catch((err) => {
+        alert("data inserted.");
+        console.log(err);
+      });
+  };
+
+  const handlecheck = (e) => {
+    var updatelist = [...checked];
+
+    if (e.target.checked) {
+      updatelist = [...checked, e.target.value];
+    } else {
+      updatelist.splice(checked.indexOf(e.target.value), 1);
+    }
+    setchecked(updatelist);
+  };
+
+  const checkitems = checked.length?checked.reduce((total, item) => {
+        return total + "," + item;
+      })
+    : "";
+
+  return (
+    <div>
+      <div className="container my-5">
+      <div class="mb-3">
+  <label for="exampleFormControlInput1" class="form-label">Name</label>
+  <input type="text" class="form-control" id="exampleFormControlInput1" name="unm" value={uname} onChange={(e)=>setuname(e.target.value)} placeholder="enter username"/>
+</div><br/>
+
+<div class="mb-3">
+  <label for="exampleFormControlInput1" class="form-label">email</label>
+  <input type="email" class="form-control" id="exampleFormControlInput1" name="email" value={email} onChange={(e)=>setemail(e.target.value)} placeholder="name@example.com"/>
+</div><br/>
+
+<div class="mb-3">
+  <label for="exampleFormControlInput1" class="form-label">Password</label>
+  <input type="password" class="form-control" id="exampleFormControlInput1" name="password" value={password} onChange={(e)=>setpassword(e.target.value)} placeholder="enter password"/>
+</div><br/>
+
+<label for="formFile" className="form-label">Gender</label>
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" checked={gender==='male'} value='male' onChange={(e)=>setgender(e.target.value)}  />
+  <label class="form-check-label" for="flexRadioDefault1">
+    Male
+  </label>
+</div>
+
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked={gender==='female'} value='female' onChange={(e)=>setgender(e.target.value)}  />
+  <label class="form-check-label" for="flexRadioDefault1">
+    feMale
+  </label>
+</div><br/>
+
+<label for="formFile" className="form-label">Hobby</label>
+{checklist.map((item,index)=>(
+    <div class="form-check">
+  <input class="form-check-input" type="checkbox" value={item} onChange={handlecheck} id="flexCheckDefault"/>
+  <label class="form-check-label" for="flexCheckDefault">
+    {item}
+  </label>
+</div>
+))}
+<br/>
+
+<label for="formFile" className="form-label">City</label>
+<select class="form-select" aria-label="Default select example" onChange={(e)=>setcity(e.target.value)}>
+  <option selected>select your city</option>
+  <option value="surat">surat</option>
+  <option value="pune">pune</option>
+  <option value="banglore">banglore</option>
+</select><br/>
+
+<button  className="btn btn-primary" onClick={adduserhandle}>Add User</button>
+      </div>
+    </div>
+  )
+}
+
+export default Adduser;
+
+
+Navbar.js
+
+import React from 'react'
+import { NavLink } from 'react-router-dom'
+
+
+const Navbar = () => {
+  return (
+    <div>
+      <nav className="navbar navbar-expand-lg bg-body-tertiary">
+  <div className="container-fluid">
+    <a className="navbar-brand" href="#">Navbar</a>
+    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span className="navbar-toggler-icon"></span>
+    </button>
+    <div className="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+        <li className="nav-item">
+          <NavLink className="nav-link active" aria-current="page" to="/">Home</NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink className="nav-link active" to="/adduser">Adduser</NavLink>
+        </li>
+        
+        
+      </ul>
+      
+    </div>
+  </div>
+</nav>
+    </div>
+  )
+}
+
+export default Navbar
+
+
+update.js
+
+import axios from 'axios';
+import React,{useEffect, useState} from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+
+const Update = () => {
+    const params=useParams();
+    const navigate=useNavigate();
+
+    const [uname, setuname] = useState("");
+    const [email, setemail] = useState("");
+    const [password, setpassword] = useState("");
+    const [gender, setgender] = useState("");
+    const [checked, setchecked] = useState("");
+    const checklist = ["coding", "playing", "reading"];
+    const [city, setcity] = useState("");
+
+    const Updatehandler = () =>{
+        const newdata=axios.put(`http://127.0.0.1:5050/reg/update/${params.id}`,{
+            uname:uname,
+            email:email,
+            password:password,
+            gender:gender,
+            hobby:checked.join(","),
+            city:city
+
+
+        })
+
+        if(newdata)
+        {
+            navigate("/");
+        }
+    }
+
+    const  search = async()=>{
+        const  ndata=await axios.get(`http://127.0.0.1:5050/reg/search/${params.id}`);
+        setuname(ndata.data.uname);
+        setemail(ndata.data.email);
+        setpassword(ndata.data.password);
+        setgender(ndata.data.gender);
+        setchecked(ndata.data.hobby.split(","));
+        setcity(ndata.data.city);
+    }
+    useEffect(()=>{
+        search()
+    },[])
+
+    const handlecheck = (e) => {
+        var updatelist = [...checked];
+    
+        if (e.target.checked) {
+          updatelist = [...checked, e.target.value];
+        } else {
+          updatelist.splice(checked.indexOf(e.target.value), 1);
+        }
+        setchecked(updatelist);
+      };
+
+
+  return (
+    <div>
+      <div className="container my-5">
+      <div class="mb-3">
+  <label for="exampleFormControlInput1" class="form-label">Name</label>
+  <input type="text" class="form-control" id="exampleFormControlInput1" name="unm" value={uname} onChange={(e)=>setuname(e.target.value)} placeholder="enter username"/>
+</div><br/>
+
+<div class="mb-3">
+  <label for="exampleFormControlInput1" class="form-label">email</label>
+  <input type="email" class="form-control" id="exampleFormControlInput1" name="email" value={email} onChange={(e)=>setemail(e.target.value)} placeholder="name@example.com"/>
+</div><br/>
+
+<div class="mb-3">
+  <label for="exampleFormControlInput1" class="form-label">Password</label>
+  <input type="password" class="form-control" id="exampleFormControlInput1" name="password" value={password} onChange={(e)=>setpassword(e.target.value)} placeholder="enter password"/>
+</div><br/>
+
+<label for="formFile" className="form-label">Gender</label>
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" checked={gender==='male'} value='male' onChange={(e)=>setgender(e.target.value)}  />
+  <label class="form-check-label" for="flexRadioDefault1">
+    Male
+  </label>
+</div>
+
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked={gender==='female'} value='female' onChange={(e)=>setgender(e.target.value)}  />
+  <label class="form-check-label" for="flexRadioDefault1">
+    feMale
+  </label>
+</div><br/>
+
+<label for="formFile" className="form-label">Hobby</label>
+{checklist.map((item,index)=>(
+    <div class="form-check">
+  <input class="form-check-input" type="checkbox" value={item} checked={checked.includes(item)} onChange={handlecheck} id="flexCheckDefault"/>
+  <label class="form-check-label" for="flexCheckDefault">
+    {item}
+  </label>
+</div>
+))}
+<br/>
+
+<label for="formFile" className="form-label">City</label>
+<select class="form-select" aria-label="Default select example" onChange={(e)=>setcity(e.target.value)}>
+  <option selected>select your city</option>
+  <option value="surat">surat</option>
+  <option value="pune">pune</option>
+  <option value="banglore">banglore</option>
+</select><br/>
+
+<button  className="btn btn-primary" onClick={Updatehandler}>Update User</button>
+      </div>
+    </div>
+  )
+}
+
+export default Update
+
+
+View.js
+
+
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const View = () => {
+  const navigate = useNavigate();
+  const [data, setdata] = useState([]);
+
+  const fetchdata = async () => {
+    const mydata = await axios.get("http://127.0.0.1:5050/reg");
+    setdata(mydata.data);
+  };
+  useEffect(() => {
+    fetchdata();
+  }, [])
+
+  const deletehandler=async (id)=>{
+     axios.delete('http://127.0.0.1:5050/reg/del/${id}');
+    fetchdata();
+    alert(id)
+  }
+
+  const updatehandler=async(id)=>{
+    navigate(`/upuser/${id}`)
+  }
+
+  const searchhandler=async(e)=>{
+    const key=e.target.value
+    if(key)
+    {
+      const result=await axios.get(`http:127.0.0.1:5050/reg/searchall/${key}`)
+      setdata(result.data)
+    }
+    else{
+      fetchdata();
+    }
+  
+  }
+ 
+  return (
+    <>
+      <div className="container">
+        <div className="m-5">
+        <div className="col-sm-3">
+          <input className="form-control" type="search" onChange={searchhandler}/>
+        </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Password</th>
+                <th scope="col">Gender</th>
+                <th scope="col">Hobby</th>
+                <th scope="col">City</th>
+                <th scope="col">Update</th>
+                <th scope="col">Delete</th>
+
+
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((item) => {
+                return (
+                  <>
+                    <tr>
+                      <td>{item._id}</td>
+                      <td>{item.uname}</td>
+                      <td>{item.email}</td>
+                      <td>{item.password}</td>
+                      <td>{item.gender}</td>
+                      <td>{item.hobby}</td>
+                      <td>{item.city}</td>
+                      <td><button className="btn btn-primary" onClick={()=>updatehandler(item._id)}>Update</button></td>
+                      <td><button className="btn btn-danger" onClick={(e)=>deletehandler(item._id)}>Delete</button></td>
+
+                    </tr>
+                  </>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default View;
+
+App.js
+
+
+import logo from './logo.svg';
+import './App.css';
+import Navbar from './component/Navbar';
+import { Route, Routes } from 'react-router-dom';
+import Adduser from './component/Adduser';
+import View from './component/View';
+import Update from './component/Update';
+
+function App() {
+  return (
+   <>
+   <Navbar/>
+   <Routes>
+    <Route path='/' element={<View/>}/>
+    <Route path='/adduser' element={<Adduser/>}/>
+    <Route path='/upuser/:id' element={<Update/>}/>
+
+   </Routes>
+   </>
+  );
+}
+
+export default App;
+
+
+Server:-
+Model:- reg_model.js
+
+const mongoose=require('mongoose');
+
+const schema=new mongoose.Schema({
+    uname:{
+        type:String,
+        required:true
+    },
+    email:{
+        type:String,
+        required:true
+    },
+    password:{
+        type:String,
+        required:true
+    },
+    gender:{
+        type:String,
+        required:true
+    },
+    hobby:{
+        type:String,
+        required:true
+    },
+    city:{
+        type:String,
+        required:true
+    },
+
+})
+
+module.exports=mongoose.model('reg',schema,'reg')
+
+
+
+Route:-
+reg_rouute.js
+
+const express=require('express');
+const schema=require('../model/reg_schema');
+const router=express.Router();
+
+//get all data
+
+router.get('/',async(req,res)=>{
+    try{
+        const data=await schema.find();
+        return res.json(data);
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
+})
+
+//add data
+
+router.post('/adduser',async(req,res)=>{
+    try{
+        const add=new schema({
+            uname:req.body.uname,
+            email:req.body.email,
+            password:req.body.password,
+            gender:req.body.gender,
+            hobby:req.body.hobby,
+            city:req.body.city,
+        })
+        const mydata=await add.save();
+        return res.json(mydata);
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
+})
+
+//delete data by id
+
+router.delete('/del/:id',async(req,res)=>{
+    const  id=req.params.id;
+    const del=await schema.findByIdAndDelete(id);
+    res.send(`delete record name is ${del.uname}`);
+})
+
+//seacrh a particular record
+
+router.get('/search/:id',async(req,res)=>{
+    const  id=req.params.id;
+    const ndata=await schema.findById(id);
+    res.json(ndata);
+})
+
+router.put('/update/:id',async(req,res)=>{
+    const update=await schema.findByIdAndUpdate(req.params.id,req.body,{new:true})
+    return res.json(update);
+})
+
+//search data by input
+
+router.get('/searchall/:key',async(req,res)=>{
+    const data=await schema.find({
+        "$or":[
+            {uname:{$regex:req.params.key}},
+            {email:{$regex:req.params.key}},
+        ]
+    })
+    return res.json(data);
+})
+
+module.exports = router;
+
+index.js:-
+
+const express=require('express');
+const app=express();
+const mongoose=require('mongoose');
+const reg=require('./route/reg_route');
+const cors=require('cors');
+
+app.use(express.json());
+app.use(cors());
+app.use('/reg',reg);
+
+mongoose.connect("mongodb://127.0.0.1:27017/db_user")
+.then(
+    console.log("connected")
+)
+.catch((err)=>{
+    console.log("err",err)
+})
+
+app.listen(5050,console.log("server running"));
+
+
+test.rest
+
+POST  http://127.0.0.1:5050/reg/adduser
+content-type: application/json
+
+{
+    "uname": "Harshil",
+    "email": "abc@gmail.com",
+    "password":"123",
+    "gender":"male",
+    "hobby":"coding",
+    "city":"surat"
+}
+
+###
+DELETE http://127.0.0.1:5050/reg/del/651918f5167a4b58a9f70b2d

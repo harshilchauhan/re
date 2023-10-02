@@ -1,0 +1,259 @@
+client side:-
+component
+display.js
+
+import React from 'react'
+import axios from 'axios'
+import { useParams } from 'react-router-dom'
+import { useState,useEffect } from 'react'
+
+const Display = () => {
+    const [data,setData] = useState([])
+    const params=useParams()
+
+    useEffect(()=>{
+        getdata()
+    },[params.id])
+
+    const getdata=async()=>{
+        //alert(params.id)
+        try{
+            if(params.id){
+                let result = await axios.get(`http://127.0.0.1:3000/api/dispRecord1/${params.id}`)
+                setData(result.data)
+            }
+            else{
+                let result = await axios.get('http://127.0.0.1:3000/api/dispRecord')
+                setData(result.data)
+            }
+
+        }catch(error){
+            console.log(error)
+        }
+    }
+
+    const disdata = data.map((d)=>{
+        return(
+            <div className='container-fluid bg-light'>
+                <div className='row text-start'>
+                    <div className='col'>
+                        <h2>{d.blog}</h2>
+                    </div>
+                </div>
+
+                <div className='row text-start'>
+                    <div className='col'>
+                        <h5>{d.blog_type}</h5>
+                    </div>
+                </div>
+
+                <div className='row text-start'>
+                    <div className='col'>
+                        <h6>{d.create_by}</h6>
+                    </div>
+                </div>
+
+                <div className='row text-dark mb-3 text-wrap'>
+                    <div className='col'>
+                        <h6>{d.blog_desc}</h6>
+                    </div>
+                </div>
+            </div>
+        )
+    })
+  return (
+    <div>
+        {disdata}
+    </div>
+  )
+}
+
+export default Display
+
+
+Header.js:-
+
+
+import React from 'react'
+import axios from 'axios'
+import { useState, useEffect } from 'react'
+import { NavLink } from 'react-router-dom';
+
+export const Header = () => {
+    const [data,setData]=useState([])
+    useEffect(()=>{
+        getdata()
+    },[])
+    const getdata=async()=>{
+        try{
+            const result=await axios.get('http://127.0.0.1:3000/api/getdistinct')
+            setData(result.data)
+        }
+        catch(error){
+            console.log(error)
+        }
+    }
+
+    const blogtype=data.map((d)=>{
+        return(
+            <li className='list-group-item'><NavLink to={`Disp/${d}`}>{d}</NavLink></li>
+        )
+    })
+
+    return (
+        <div className='container-fluid bg-light'>
+            <h1>Jemin's Blog</h1>
+            <ul className='list-group list-group-horizontal'>
+                <li className='list-group-item'>
+                <NavLink to={`/`}>All</NavLink>
+                </li>
+                {blogtype}
+            </ul>
+            
+        </div>
+    )
+}
+
+export default Header
+
+
+App.js
+
+
+//import logo from './logo.svg';
+import './App.css';
+import Display from './component/Display';
+import Header from './component/Header';
+//import { NavLink } from 'react-router-dom';
+import { Routes,Route } from 'react-router-dom';
+
+function App() {
+  return (
+    <div>
+     <Header/>
+     <Routes >
+      <Route path='/' element={<Display/>} exact />
+      <Route path='/Disp/:id' element={<Display/>} exact />
+      <Route path='*' element={<Display/>} exact />
+       
+     </Routes>
+     
+
+    </div>
+  );
+}
+
+export default App;
+
+
+server:-
+model:-
+
+
+blog_model.js
+
+
+const mongoose=require('mongoose')
+const blog=new mongoose.Schema({
+    blog_type:{
+        type:String,
+        require:true,
+    },
+    blog:{
+        type:String,
+        require:true,
+    },
+    blog_desc:{
+        type:String,
+        require:true,
+    },
+    create_by:{
+        type:String,
+        require:true,
+    },
+    create_date:{
+        type:Date,
+        default:Date.now,
+    },
+
+})
+
+module.exports = mongoose.model('blog',blog)
+
+route:-
+
+blog_route.js
+
+const express=require('express')
+const router=express.Router()
+
+const bloginfo=require('../models/blog_model')
+
+router.post('/addBlog',async(req,res)=>{
+    const blogentry=new bloginfo({
+        blog_type:req.body.blog_type,
+        blog:req.body.blog,
+        blog_desc:req.body.blog_desc,
+        create_by:req.body.create_by,
+        create_date:req.body.create_date,
+    })
+
+    blogentry.save();
+})
+
+router.get('/dispRecord',async(req,res)=>{
+    const data=await bloginfo.find()
+    res.send(data)
+})
+
+router.get('/getdistinct',async(req,res)=>{
+    const result=await bloginfo.distinct('blog_type')
+    res.send(result)
+})
+
+router.get('/dispRecord1/:type',async(req,res)=>{
+    const data=await bloginfo.find({blog_type:req.params.type})
+    res.send(data)
+})
+
+module.exports = router
+
+
+server.js
+
+
+const express=require('express')
+const mongoose=require('mongoose')
+const app=express()
+
+const cors=require('cors')
+
+const routesUrl=require('./route/blog_routes')
+
+mongoose.connect('mongodb://127.0.0.1:27017/blogs')
+
+app.use(express.json())
+app.use(cors())
+
+app.use('/api',routesUrl)
+
+app.listen(3000,()=>{
+    console.log('server is running')
+})
+
+
+
+request.rest:-
+
+POST http://127.0.0.1:3000/api/addBlog
+content-type: application/json
+
+{
+    "blog_type": "DBMS",
+    "blog": "Introduction To DBMS",
+    "blog_desc": "UVR",
+    "create_by": "Shubham Sharma"  
+}
+
+###
+GET http://127.0.0.1:3000/api/dispRecord
